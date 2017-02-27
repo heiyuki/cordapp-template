@@ -37,7 +37,7 @@ class TemplatePlugin : CordaPluginRegistry() {
     )
 
     /**
-     * Whitelisting the required types with Corda's serialisation framework.
+     * Whitelisting the required types for serialisation by the Corda node.
      */
     override fun customizeSerialization(custom: SerializationCustomization): Boolean {
         return true

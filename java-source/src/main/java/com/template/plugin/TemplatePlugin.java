@@ -44,7 +44,7 @@ public class TemplatePlugin extends CordaPluginRegistry {
     );
 
     /**
-     * Whitelisting the required types with Corda's serialisation framework.
+     * Whitelisting the required types for serialisation by the Corda node.
      */
     @Override
     public boolean customizeSerialization(SerializationCustomization custom) {
