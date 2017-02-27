@@ -43,6 +43,9 @@ public class TemplatePlugin extends CordaPluginRegistry {
             "template", getClass().getClassLoader().getResource("templateWeb").toExternalForm()
     );
 
+    /**
+     * Whitelisting the required types with Corda's serialisation framework.
+     */
     @Override
     public boolean customizeSerialization(SerializationCustomization custom) {
         return true;
