@@ -2,37 +2,42 @@ package com.template.plugin;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.template.api.TemplateApi;
-import com.template.flow.TemplateFlow;
-import com.template.service.TemplateService;
+import com.template.api.IssuerApi;
+import net.corda.core.contracts.Amount;
+import net.corda.core.crypto.Party;
 import net.corda.core.messaging.CordaRPCOps;
 import net.corda.core.node.CordaPluginRegistry;
 import net.corda.core.node.PluginServiceHub;
+import net.corda.core.serialization.OpaqueBytes;
 import net.corda.core.serialization.SerializationCustomization;
+import net.corda.flows.AbstractCashFlow;
+import net.corda.flows.IssuerFlow;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 public class TemplatePlugin extends CordaPluginRegistry {
     /**
      * A list of classes that expose web APIs.
      */
-    private final List<Function<CordaRPCOps, ?>> webApis = ImmutableList.of(TemplateApi::new);
+    private final List<Function<CordaRPCOps, ?>> webApis = ImmutableList.of(IssuerApi::new);
 
     /**
      * A list of flows required for this CorDapp.
      */
     private final Map<String, Set<String>> requiredFlows = ImmutableMap.of(
-            TemplateFlow.Initiator.class.getName(),
-            ImmutableSet.of());
+            IssuerFlow.IssuanceRequester.class.getName(),
+            new HashSet<>(Arrays.asList(
+                    AbstractCashFlow.class.getName(),
+                    Party.class.getName(),
+                    Amount.class.getName(),
+                    OpaqueBytes.class.getName()
+            )));
 
     /**
      * A list of long-lived services to be hosted within the node.
      */
-    private final List<Function<PluginServiceHub, ?>> servicePlugins = ImmutableList.of(TemplateService::new);
+    private final List<Function<PluginServiceHub, ?>> servicePlugins = Collections.singletonList(IssuerFlow.Issuer.Service::new);
 
     /**
      * A list of directories in the resources directory that will be served by Jetty under /web.
