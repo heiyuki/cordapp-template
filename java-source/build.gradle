@@ -65,7 +65,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['build']) {
     node {
         name "NodeA"
         nearestCity "London"
-        advertisedServices = []
+        advertisedServices = ["corda.issuer.USD"]
         artemisPort 10004
         webPort 10005
         cordapps = []
@@ -74,7 +74,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['build']) {
     node {
         name "NodeB"
         nearestCity "New York"
-        advertisedServices = []
+        advertisedServices = ["corda.converter"]
         artemisPort 10006
         webPort 10007
         cordapps = []
