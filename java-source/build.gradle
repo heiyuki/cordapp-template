@@ -63,31 +63,28 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['build']) {
         cordapps = []
     }
     node {
-        name "NodeA"
+        name "issuer"
         nearestCity "London"
-        advertisedServices = []
+        advertisedServices = ["corda.issuer.USD"]
         artemisPort 10004
         webPort 10005
         cordapps = []
-        rpcUsers = [[ user: "user1", "password": "test", "permissions": []]]
     }
     node {
-        name "NodeB"
+        name "BankA"
         nearestCity "New York"
         advertisedServices = []
         artemisPort 10006
         webPort 10007
         cordapps = []
-        rpcUsers = [[ user: "user1", "password": "test", "permissions": []]]
     }
     node {
-        name "NodeC"
+        name "BankB"
         nearestCity "San Francisco"
         advertisedServices = []
         artemisPort 10008
         webPort 10009
         cordapps = []
-        rpcUsers = [[ user: "user1", "password": "test", "permissions": []]]
     }
 }
 

@@ -33,6 +33,7 @@ public class IssuerApi {
     private List<Party> peers;
     private List<Party> notaries;
     private List<Party> issuers;
+    private List<Party> shops;
 
     public IssuerApi(CordaRPCOps services) {
         this.services = services;
@@ -43,37 +44,41 @@ public class IssuerApi {
     }
 
 
+    public String issueMoney(String peer,String cc,long money){
+        try {
+
+            if (notaries.isEmpty()) {
+                updateNotaries();
+            }
+
+            Party party = services.partyFromName(peer);
+            Currency curr = ContractsDSL.USD;
+            if (cc.equals("USD")) {
+                curr = ContractsDSL.USD;
+            } else if (cc.equals("EUR")) {
+                curr = ContractsDSL.EUR;
+            } else if (cc.equals("CHF")) {
+                curr = ContractsDSL.CHF;
+            } else if (cc.equals("GBP")) {
+                curr = ContractsDSL.GBP;
+            }
+            CashFlowCommand.IssueCash cash = new CashFlowCommand.IssueCash(new Amount<>((long) money, curr), OpaqueBytes.Companion.of((byte) 1), party, notaries.get(0));
+            FlowHandle handle = services.startFlowDynamic(IssuerFlow.IssuanceRequester.class, cash.getAmount(), cash.getRecipient(), cash.getIssueRef(), services.nodeIdentity().getLegalIdentity());
+
+            SignedTransaction signedTransaction = (SignedTransaction) handle.getReturnValue().get();
+            return signedTransaction.getId().toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return e.getMessage();
+        }
+    }
+
     @GET
     @Path("issue/{peer}/{money}/{currency}")
     public String testing(@PathParam("peer") String peer, @PathParam("money") long money, @PathParam("currency") String cc) {
 
         if (this.isIssuer(this.me)) {
-            try {
-
-                if (notaries.isEmpty()) {
-                    updateNotaries();
-                }
-
-                Party party = services.partyFromName(peer);
-                Currency curr = ContractsDSL.USD;
-                if (cc == "USD") {
-                    curr = ContractsDSL.USD;
-                } else if (cc == "EUR") {
-                    curr = ContractsDSL.EUR;
-                } else if (cc == "CHF") {
-                    curr = ContractsDSL.CHF;
-                } else if (cc == "GBP") {
-                    curr = ContractsDSL.GBP;
-                }
-                CashFlowCommand.IssueCash cash = new CashFlowCommand.IssueCash(new Amount<>((long) money, curr), OpaqueBytes.Companion.of((byte) 1), party, notaries.get(0));
-                FlowHandle handle = services.startFlowDynamic(IssuerFlow.IssuanceRequester.class, cash.getAmount(), cash.getRecipient(), cash.getIssueRef(), services.nodeIdentity().getLegalIdentity());
-
-                SignedTransaction signedTransaction = (SignedTransaction) handle.getReturnValue().get();
-                return signedTransaction.getId().toString();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return e.getMessage();
-            }
+            return this.issueMoney(peer,cc,money);
         } else {
             return "Not An Issuer";
         }
@@ -90,19 +95,17 @@ public class IssuerApi {
     @GET
     @Path("transfer/{peer}/{money}/{currency}")
     public String transfer(@PathParam("peer") String peer, @PathParam("money") long money, @PathParam("currency") String cc) {
-
-
         if (!this.isIssuer(peer)) {
             try {
                 Party party = services.partyFromName(peer);
                 Currency curr = ContractsDSL.USD;
-                if (cc == "USD") {
+                if (cc.equals("USD")) {
                     curr = ContractsDSL.USD;
-                } else if (cc == "EUR") {
+                } else if (cc.equals("EUR")) {
                     curr = ContractsDSL.EUR;
-                } else if (cc == "CHF") {
+                } else if (cc.equals("CHF")) {
                     curr = ContractsDSL.CHF;
-                } else if (cc == "GBP") {
+                } else if (cc.equals("GBP")) {
                     curr = ContractsDSL.GBP;
                 }
                 Amount<Issued<Currency>> a = new Amount<Issued<Currency>>((long) money, new Issued<>(new PartyAndReference(issuers.get(0), OpaqueBytes.Companion.of((byte) 1)), curr));
@@ -111,8 +114,8 @@ public class IssuerApi {
 
                 FlowHandle handle = cash.startFlow(services);
 
-                SignedTransaction signedTransaction = (SignedTransaction) handle.getReturnValue().get();    x
-                return signedTransaction.getId().toString();
+                SignedTransaction signedTransaction = (SignedTransaction) handle.getReturnValue().get();
+                return signedTransaction..getId().toString();
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 return e.getMessage();
@@ -125,6 +128,7 @@ public class IssuerApi {
             return "";
         }
     }
+
 
 
     private void updatePeers() {
@@ -156,6 +160,19 @@ public class IssuerApi {
                     nodeInfo.getAdvertisedServices()) {
                 if (serviceEntry.getInfo().getType().getId().contains("corda.issuer.")) {
                     issuers.add(nodeInfo.getLegalIdentity());
+                }
+            }
+        }
+    }
+
+    private void updateShops() {
+        shops = new ArrayList<>();
+        for (NodeInfo nodeInfo :
+                services.networkMapUpdates().getFirst()) {
+            for (ServiceEntry serviceEntry :
+                    nodeInfo.getAdvertisedServices()) {
+                if (serviceEntry.getInfo().getType().getId().contains("corda.shop.")) {
+                    shops.add(nodeInfo.getLegalIdentity());
                 }
             }
         }
