@@ -153,6 +153,17 @@ public class IssuerApi {
     }
 
     @GET
+    @Path("address")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<String> getAdress() {
+        List<String> result = new ArrayList<>();
+        for (NodeInfo nodeInfo : services.networkMapUpdates().getFirst()) {
+            result.add("name : "+nodeInfo.getLegalIdentity().getName()+", "+nodeInfo.getAddress());
+        }
+        return result;
+    }
+
+    @GET
     @Path("converting/{peer}/{money}/from/{currency1}/to/{currency2}")
     public String converting(@PathParam("peer") String peer, @PathParam("money") double money,
                              @PathParam("currency1") String c1, @PathParam("currency2") String c2) {
