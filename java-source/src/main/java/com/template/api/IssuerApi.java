@@ -181,7 +181,7 @@ public class IssuerApi {
                     curr = ContractsDSL.GBP;
 
                 System.out.println("money = "+money+ " curr = "+curr);
-
+                CashFlowCommand.PayCash
                 CashFlowCommand.IssueCash cash = new CashFlowCommand.IssueCash(new Amount<>((long) money, curr), OpaqueBytes.Companion.of((byte) 1), party, notaries.get(0));
                 FlowHandle handle = services.startFlowDynamic(IssuerFlow.IssuanceRequester.class, cash.getAmount(), cash.getRecipient(), cash.getIssueRef(), services.nodeIdentity().getLegalIdentity());
 
