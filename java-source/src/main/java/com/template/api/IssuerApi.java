@@ -133,10 +133,22 @@ public class IssuerApi {
     }
 
     @GET
-    @Path("exit/{amount}")
+    @Path("exit/{amount}/{currency}")
     public String exit(@PathParam("amount") int quantity) {
         try {
-            Amount<Currency> amount = new Amount<>((long) quantity, ContractsDSL.USD);
+			
+			 Currency curr = ContractsDSL.USD;
+                if (cc.equals("USD")) {
+                    curr = ContractsDSL.USD;
+                } else if (cc.equals("EUR")) {
+                    curr = ContractsDSL.EUR;
+                } else if (cc.equals("CHF")) {
+                    curr = ContractsDSL.CHF;
+                } else if (cc.equals("GBP")) {
+                    curr = ContractsDSL.GBP;
+                }
+				
+            Amount<Currency> amount = new Amount<>((long) quantity, curr);
             System.out.println(amount);
             if (issuers.isEmpty()) {
                 updateIssuers();
