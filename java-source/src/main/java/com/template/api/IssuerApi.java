@@ -134,7 +134,7 @@ public class IssuerApi {
 
     @GET
     @Path("exit/{amount}/{currency}")
-    public String exit(@PathParam("amount") int quantity) {
+    public String exit(@PathParam("amount") int quantity, @PathParam("currency") String cc) {
         try {
 			
 			 Currency curr = ContractsDSL.USD;
