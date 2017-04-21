@@ -209,7 +209,7 @@ public class IssuerApi {
                 FlowHandle handle = services.startFlowDynamic(IssuerFlow.IssuanceRequester.class, cash.getAmount(), cash.getRecipient(), cash.getIssueRef(), services.nodeIdentity().getLegalIdentity());
 
                 SignedTransaction signedTransaction = (SignedTransaction) handle.getReturnValue().get();
-                return signedTransaction.toString();
+                return signedTransaction.getId().toString();
             } catch (Exception e) {
                 e.printStackTrace();
                 return e.getMessage();
