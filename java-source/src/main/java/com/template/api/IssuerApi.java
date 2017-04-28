@@ -133,10 +133,22 @@ public class IssuerApi {
     }
 
     @GET
-    @Path("exit/{amount}")
-    public String exit(@PathParam("amount") int quantity) {
+    @Path("exit/{amount}/{currency}")
+    public String exit(@PathParam("amount") int quantity, @PathParam("currency") String cc) {
         try {
-            Amount<Currency> amount = new Amount<>((long) quantity, ContractsDSL.USD);
+			
+			 Currency curr = ContractsDSL.USD;
+                if (cc.equals("USD")) {
+                    curr = ContractsDSL.USD;
+                } else if (cc.equals("EUR")) {
+                    curr = ContractsDSL.EUR;
+                } else if (cc.equals("CHF")) {
+                    curr = ContractsDSL.CHF;
+                } else if (cc.equals("GBP")) {
+                    curr = ContractsDSL.GBP;
+                }
+				
+            Amount<Currency> amount = new Amount<>((long) quantity, curr);
             System.out.println(amount);
             if (issuers.isEmpty()) {
                 updateIssuers();
@@ -164,8 +176,8 @@ public class IssuerApi {
     }
 
     @GET
-    @Path("converting/{peer}/{money}/from/{currency1}/to/{currency2}")
-    public String converting(@PathParam("peer") String peer, @PathParam("money") double money,
+    @Path("converting/{money}/from/{currency1}/to/{currency2}")
+    public long converting(@PathParam("money") double money,
                              @PathParam("currency1") String c1, @PathParam("currency2") String c2) {
 
         if (this.isConverter(this.me)) {
@@ -175,34 +187,37 @@ public class IssuerApi {
                     updateNotaries();
                 }
 
-                Party party = services.partyFromName(peer);
-                Currency curr = ContractsDSL.USD;
+                //Party party = services.partyFromName(peer);
+                //Currency curr = ContractsDSL.USD;
 
                 double ratio = convert(c1,c2);
                 System.out.println("ration finale = "+ratio);
                 money = money * ratio ;
 
-                if(c2.equals("USD"))
+               /* if(c2.equals("USD"))
                     curr = ContractsDSL.USD;
                 else if(c2.equals("EUR"))
                     curr = ContractsDSL.EUR;
                 else if(c2.equals("CHF"))
                     curr = ContractsDSL.CHF;
                 else if(c2.equals("GBP"))
-                    curr = ContractsDSL.GBP;
+                    curr = ContractsDSL.GBP;*/
 
-                System.out.println("money = "+money+ " curr = "+curr);
-                CashFlowCommand.IssueCash cash = new CashFlowCommand.IssueCash(new Amount<>((long) money, curr), OpaqueBytes.Companion.of((byte) 1), party, notaries.get(0));
+
+                //System.out.println("money = "+money+ " curr = "+curr);
+
+                /*CashFlowCommand.IssueCash cash = new CashFlowCommand.IssueCash(new Amount<>((long) money, curr), OpaqueBytes.Companion.of((byte) 1), party, notaries.get(0));
                 FlowHandle handle = services.startFlowDynamic(IssuerFlow.IssuanceRequester.class, cash.getAmount(), cash.getRecipient(), cash.getIssueRef(), services.nodeIdentity().getLegalIdentity());
 
                 SignedTransaction signedTransaction = (SignedTransaction) handle.getReturnValue().get();
-                return signedTransaction.toString();
+                return signedTransaction.getId().toString();*/
+				return (long) money;
             } catch (Exception e) {
                 e.printStackTrace();
-                return e.getMessage();
+                return -1;
             }
         } else {
-            return "Not An Converter";
+            return -1;
         }
     }
 
